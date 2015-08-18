@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="sensors">
+        <item name="MultiPointsTouch">多点触控</item>
+        <item name="ForeCamera">摄像头</item>
+        <item name="Bluetooth">蓝牙</item>
+        <item name="GPS">GPS</item>
+        <item name="TempSensor">温度传感器</item>
+        <item name="HumiditySensor">湿度传感器</item>
+        <item name="GravitySensor">加速度传感器</item>
+        <item name="DistanceSensor">距离传感器</item>
+        <item name="MagneticFiledSensor">磁场传感器</item>
+        <item name="LightCompass">光线传感器</item>
+        <item name="HeartRateSensor">心率传感器</item>
+        <item name="StepCount">计步器</item>
+        <item name="NFC">NFC</item>
+    </string-array>
+</resources>
