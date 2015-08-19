@@ -11,4 +11,5 @@
     <string name="title_activity_main2">Main2Activity</string>
     <string name="title_activity_multi_touch">MultiTouchActivity</string>
     <string name="title_activity_camera">CameraActivity</string>
+    <string name="title_activity_bluetooth">BluetoothActivity</string>
 </resources>
