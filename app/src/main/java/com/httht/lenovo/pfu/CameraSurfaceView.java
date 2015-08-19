@@ -1,6 +1,7 @@
 package com.httht.lenovo.pfu;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.os.Build;
@@ -125,6 +126,9 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 }
                 camera = Camera.open(curCameraIndex);
                 if(camera!=null){
+                    if(this.getResources().getConfiguration().orientation!= Configuration.ORIENTATION_LANDSCAPE){
+                        camera.setDisplayOrientation(90);
+                    }
                     try {
                         camera.setPreviewDisplay(holder);
                         camera.startPreview();
@@ -157,6 +161,9 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
 //                Camera.Parameters parameters = camera.getParameters();
 //                parameters.setPreviewSize(width, height);
 //                camera.setParameters(parameters);
+                if(this.getResources().getConfiguration().orientation!= Configuration.ORIENTATION_LANDSCAPE){
+                    camera.setDisplayOrientation(90);
+                }
                 try {
                     camera.setPreviewDisplay(holder);
                     camera.startPreview();
