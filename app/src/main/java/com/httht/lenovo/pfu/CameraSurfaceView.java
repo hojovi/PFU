@@ -37,18 +37,19 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
         holder.addCallback(this);
     }
 
-    public void takePicture(final String dir){
+    public String takePicture(final String dir){
         if(Build.VERSION.SDK_INT<21){
-            if(camera!=null){
+            if(camera!=null&&!isRecord){
+                int i=1;
+                while(new File(dir+"/PFU_"+String.valueOf(i)+".jpeg").exists()){
+                    i++;
+                }
+                final String path=dir+"/PFU_"+String.valueOf(i)+".jpeg";
                 camera.takePicture(null, null, null, new Camera.PictureCallback() {
                     @Override
                     public void onPictureTaken(byte[] data, Camera camera) {
                         try {
-                            int i=1;
-                            while(new File(dir+"/PFU_"+String.valueOf(i)+".jpeg").exists()){
-                                i++;
-                            }
-                            FileOutputStream fos=new FileOutputStream(dir+"/PFU_"+String.valueOf(i)+".jpeg");
+                            FileOutputStream fos=new FileOutputStream(path);
                             fos.write(data);
                             fos.close();
                             camera.startPreview();
@@ -60,35 +61,48 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
 
                     }
                 });
+                return path;
             }
         }
+        return null;
     }
 
-    public void startMediaRecord(String dir){
+    public String startMediaRecord(String dir){
         if(Build.VERSION.SDK_INT<21) {
-            recorder = new MediaRecorder();
-            camera.unlock();
-            recorder.setCamera(camera);
-            recorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
-            recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
-            SimpleDateFormat df=new SimpleDateFormat("yy_MM_dd_HH_mm_ss");
-            String cur=df.format(new Date());
-            String path=dir+"/PFU"+cur+".3gp";
-            recorder.setOutputFile(path);
-            recorder.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-            try {
-                isRecord=true;
-                recorder.prepare();
-                recorder.start();
-            } catch (IOException e) {
-                e.printStackTrace();
+            if(camera!=null&&!isRecord) {
+                recorder = new MediaRecorder();
+                camera.unlock();
+                recorder.setCamera(camera);
+                recorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+                recorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
+                recorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+//                CamcorderProfile profile=CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH);
+//                recorder.setProfile(profile);
+                recorder.setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT);
+                recorder.setVideoEncoder(MediaRecorder.VideoEncoder.DEFAULT);
+                SimpleDateFormat df = new SimpleDateFormat("yy_MM_dd_HH_mm_ss");
+                String cur = df.format(new Date());
+                String path = dir + "/PFU" + cur + ".3gp";
+                recorder.setOutputFile(path);
+//                recorder.setVideoSize(getWidth(),getHeight());
+//                recorder.setVideoFrameRate(4);
+                recorder.setPreviewDisplay(holder.getSurface());
+                try {
+                    isRecord = true;
+                    recorder.prepare();
+                    recorder.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                return path;
             }
         }
+        return null;
     }
 
     public void stopMediaRecord(){
         if(Build.VERSION.SDK_INT<21){
-            if(recorder!=null){
+            if(recorder!=null&&isRecord){
                 recorder.stop();
                 recorder.reset();
                 recorder.release();
@@ -107,6 +121,7 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
                 curCameraIndex = (curCameraIndex + 1) % cameraNums;
                 if(camera!=null){
                     camera.stopPreview();
+                    camera.release();
                 }
                 camera = Camera.open(curCameraIndex);
                 if(camera!=null){
@@ -159,6 +174,7 @@ public class CameraSurfaceView extends SurfaceView implements SurfaceHolder.Call
             if(camera!=null){
                 camera.stopPreview();
                 camera.release();
+                camera=null;
             }
         }
     }

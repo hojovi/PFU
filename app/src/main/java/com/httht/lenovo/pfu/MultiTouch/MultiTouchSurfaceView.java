@@ -5,6 +5,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -64,31 +65,50 @@ public class MultiTouchSurfaceView extends SurfaceView implements SurfaceHolder.
             for(Paint paint:touchPaints){
                 paint.setColor(new Random().nextInt(0xffffff));
             }
-            MAX_TOUCHPOINTS=touchPoints;
+            MAX_TOUCHPOINTS = touchPoints;
         }
 
-        Canvas canvas=holder.lockCanvas();
-        if(canvas!=null){
-            switch (event.getAction()){
-                case MotionEvent.ACTION_DOWN:
-                    canvas.drawColor(Color.BLACK);
-                    break;
-                case MotionEvent.ACTION_UP:
-                    canvas.drawColor(Color.BLACK);
-                    float tWidth = textPaint.measureText(START_TEXT);
-                    canvas.drawText(START_TEXT, width / 2 - tWidth / 2, height / 2,
-                            textPaint);
-                    break;
-                case MotionEvent.ACTION_MOVE:
-                    for(int i=0;i<touchPoints;i++){
-                        int id=event.getPointerId(i);
-                        float X=  event.getX();
-                        float Y=  event.getY();
-                        canvas.drawCircle(X,Y,20,touchPaints[id]);
+        Canvas canvas;
+        switch (event.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                Log.e("action","down");
+                for(int j=0;j<5;j++) {
+                    canvas = holder.lockCanvas();
+                    if(canvas!=null) {
+                        canvas.drawColor(Color.BLACK);
+                        holder.unlockCanvasAndPost(canvas);
                     }
-                    break;
-            }
-            holder.unlockCanvasAndPost(canvas);
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.e("action","up");
+                for(int j=0;j<5;j++) {
+                    canvas = holder.lockCanvas();
+                    if(canvas!=null) {
+                        canvas.drawColor(Color.BLACK);
+                        float tWidth = textPaint.measureText(START_TEXT);
+                        canvas.drawText(START_TEXT, width / 2 - tWidth / 2, height / 2,
+                                textPaint);
+                        holder.unlockCanvasAndPost(canvas);
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_MOVE:
+                Log.e("action","move");
+                for(int j=0;j<5;j++) {
+                    canvas=holder.lockCanvas();
+                    if(canvas!=null) {
+                        for (int i = 0; i < touchPoints; i++) {
+                            int id = event.getPointerId(i);
+//                        Log.e("pointerid",String.valueOf(id));
+                            float X = event.getX(i);
+                            float Y = event.getY(i);
+                            canvas.drawCircle(X, Y, 10, touchPaints[id]);
+                        }
+                        holder.unlockCanvasAndPost(canvas);
+                    }
+                }
+                break;
         }
         return true;
     }
