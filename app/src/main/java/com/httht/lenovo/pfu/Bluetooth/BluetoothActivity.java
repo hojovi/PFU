@@ -3,13 +3,13 @@ package com.httht.lenovo.pfu.Bluetooth;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Pair;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -21,19 +21,26 @@ import android.widget.Toast;
 
 import com.httht.lenovo.pfu.R;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.UUID;
 
+@Deprecated
 public class BluetoothActivity extends AppCompatActivity {
+    private static final int REQUEST_ENABLE_BLUETOOTH=1;
+    private static final int REQUEST_DISCOVERY_BLUETOOTH=2;
+    private static final int SOCKET_WRITE = 3;
+    private static final int SOCKET_READ = 4;
+
     private TextView textView4;
     private Button button5;
     private ListView listView2;
     private MyAdapter adapter;
-    private List<Pair<String,String>> devices;
+    private List<BluetoothDevice> devices;
     private BluetoothAdapter bluetoothAdapter;
     private MyBroadcastReceiver receiver;
+
+    private List<BluetoothSocket> curSockets;
+    private BluetoothServerSocket serverSocket;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,11 +60,12 @@ public class BluetoothActivity extends AppCompatActivity {
             }
         });
         receiver=new MyBroadcastReceiver();
+        curSockets=new LinkedList<>();
         bluetoothAdapter=BluetoothAdapter.getDefaultAdapter();
         if(bluetoothAdapter!=null){
             if(!bluetoothAdapter.isEnabled()){
                 Intent intent=new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(intent, 1);
+                startActivityForResult(intent, REQUEST_ENABLE_BLUETOOTH);
             }else{
                 bluetoothOpened();
             }
@@ -74,8 +82,18 @@ public class BluetoothActivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if(resultCode==RESULT_OK){
-            bluetoothOpened();
+        if(requestCode==REQUEST_ENABLE_BLUETOOTH) {
+            if (resultCode == RESULT_OK) {
+                bluetoothOpened();
+            }else{
+                Toast.makeText(this,"打开蓝牙失败",Toast.LENGTH_SHORT).show();
+            }
+        }else if(requestCode==REQUEST_DISCOVERY_BLUETOOTH){
+            if(resultCode==RESULT_OK){
+
+            }else{
+                Toast.makeText(this,"应用没有发现设备的权限",Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
@@ -113,15 +131,14 @@ public class BluetoothActivity extends AppCompatActivity {
             String action=intent.getAction();
             if(BluetoothDevice.ACTION_FOUND.equals(action)){
                 BluetoothDevice device=intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                String str1=device.getName();
-                String str2=device.getAddress();
-                if(device.getBondState()==BluetoothDevice.BOND_BONDED){
-                    str1+="(已配对）";
-                }
-                devices.add(new Pair<String, String>(str1,str2));
+                devices.add(device);
                 adapter.notifyDataSetChanged();
             }else if(BluetoothAdapter.ACTION_DISCOVERY_FINISHED.equals(action)){
                 Toast.makeText(BluetoothActivity.this,"搜索完成",Toast.LENGTH_SHORT).show();
+            }else if(BluetoothDevice.ACTION_NAME_CHANGED.equals(action)){
+
+            }else if(BluetoothAdapter.ACTION_SCAN_MODE_CHANGED.equals(action)){
+
             }
         }
     }
@@ -129,8 +146,8 @@ public class BluetoothActivity extends AppCompatActivity {
     class MyAdapter extends BaseAdapter{
 //        private String[] str1;
 //        private String[] str2;
-        private List<Pair<String,String>> list;
-        public MyAdapter(List<Pair<String,String>> list){
+        private List<BluetoothDevice> list;
+        public MyAdapter(List<BluetoothDevice> list){
             this.list=list;
         }
         @Override
@@ -160,8 +177,8 @@ public class BluetoothActivity extends AppCompatActivity {
             }else{
                 holder= (Holder) convertView.getTag();
             }
-            holder.textView1.setText(list.get(position).first);
-            holder.textView2.setText(list.get(position).second);
+            holder.textView1.setText(list.get(position).getName());
+            holder.textView2.setText(list.get(position).getAddress());
             return  convertView;
         }
 
@@ -171,20 +188,71 @@ public class BluetoothActivity extends AppCompatActivity {
         }
     }
 
-    class BluetoothThread extends Thread{
-        private String serverName;
-        public BluetoothThread(String serverName){
-            this.serverName=serverName;
-        }
-        @Override
-        public void run() {
-            try {
-                BluetoothServerSocket serverSocket=bluetoothAdapter.listenUsingRfcommWithServiceRecord(serverName, UUID.randomUUID());
-                serverSocket.accept();
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-    }
+//    class BluetoothThread extends Thread{
+//        private String serverName;
+//
+//        public BluetoothThread(String serverName){
+//            this.serverName=serverName;
+//        }
+//        @Override
+//        public void run() {
+//            try {
+//                BluetoothSocket bs;
+//                while(true){
+//                    serverSocket=bluetoothAdapter.listenUsingRfcommWithServiceRecord(serverName, UUID.randomUUID());
+//                    bs=serverSocket.accept();
+//                    if(bs==null){
+//                        break;
+//                    }
+//                    curSockets.add(bs);
+//                };
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//    }
+//
+//    class BluetoothSRThread extends Thread{
+//        private BluetoothSocket socket;
+//        private String path;
+//        private int action;
+//        private byte[] bytes;
+//
+//        public BluetoothSRThread(BluetoothSocket socket,String path,int action){
+//            this.socket=socket;
+//            this.path=path;
+//            this.action=action;
+//            bytes=new byte[1024*5];
+//        }
+//
+//        @Override
+//        public void run() {
+//            try {
+//                switch (action) {
+//                    case SOCKET_WRITE:
+//                        OutputStream os = socket.getOutputStream();
+//                        FileInputStream fis=new FileInputStream(path);
+//                        int len=-1;
+//                        while((len=fis.read(bytes))!=-1){
+//                            os.write(bytes,0,len);
+//                        }
+//                        fis.close();
+//                        os.close();
+//                        break;
+//                    case SOCKET_READ:
+//                        InputStream is=socket.getInputStream();
+//                        FileOutputStream fos=new FileOutputStream(path);
+//                        int len1=-1;
+//                        while((len1=is.read(bytes))!=-1){
+//                            fos.write(bytes,0,len1);
+//                        }
+//                        is.close();
+//                        fos.close();
+//                        break;
+//                }
+//            }catch (IOException e){
+//                e.printStackTrace();
+//            }
+//        }
+//    }
 }
