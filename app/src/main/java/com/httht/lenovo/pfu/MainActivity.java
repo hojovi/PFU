@@ -1,15 +1,9 @@
 package com.httht.lenovo.pfu;
 
-import android.annotation.TargetApi;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Camera;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCharacteristics;
-import android.hardware.camera2.CameraManager;
-import android.os.Build;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,8 +16,6 @@ import android.widget.TextView;
 
 import com.httht.lenovo.pfu.CCamera.CameraActivity;
 import com.httht.lenovo.pfu.MultiTouch.MultiTouchActivity;
-
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -62,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
                         intent=new Intent(MainActivity.this, CameraActivity.class);
                         startActivity(intent);
                         break;
+
                 }
             }
         });

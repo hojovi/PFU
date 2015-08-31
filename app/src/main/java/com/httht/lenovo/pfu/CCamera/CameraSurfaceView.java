@@ -1,4 +1,4 @@
-package com.httht.lenovo.pfu;
+package com.httht.lenovo.pfu.CCamera;
 
 import android.content.Context;
 import android.content.res.Configuration;

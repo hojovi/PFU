@@ -11,7 +11,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
 
-import com.httht.lenovo.pfu.CameraSurfaceView;
 import com.httht.lenovo.pfu.R;
 
 import java.io.File;

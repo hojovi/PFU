@@ -43,7 +43,7 @@
         android:layout_toEndOf="@+id/button3"
         android:text="翻转" />
 
-    <com.httht.lenovo.pfu.CameraSurfaceView
+    <com.httht.lenovo.pfu.CCamera.CameraSurfaceView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/view2"
