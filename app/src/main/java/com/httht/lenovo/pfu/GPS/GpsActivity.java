@@ -5,11 +5,14 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.v7.app.AppCompatActivity;
+import android.telephony.TelephonyManager;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -23,18 +26,24 @@ public class GpsActivity extends AppCompatActivity {
     public static final int GPS_UPDATE_SATELLITE_STATUS=3;
     public static final int GPS_REQUEST_ENABLE=4;
     public static final int GPS_CLOSED=5;
+
+    public static final int BASE_STATION_LOCATIONC_CHANGGED=6;
+
     private TextView textView;
+    private TextView textView2;
     private double latitude=0.0;
     private double longitude=0.0;
     private LocationManager lm;
     private Handler handler;
     private MyGPS myGPS;
+    private BaseStation baseStation;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_gps);
 
         textView=(TextView)findViewById(R.id.textView8);
+        textView2=(TextView)findViewById(R.id.textView10);
         lm=(LocationManager)getSystemService(LOCATION_SERVICE);
         handler=new Handler(){
             @Override
@@ -63,11 +72,16 @@ public class GpsActivity extends AppCompatActivity {
                     case GPS_CLOSED:
                         Toast.makeText(GpsActivity.this,"GPS被关闭",Toast.LENGTH_SHORT).show();
                         break;
+                    case BASE_STATION_LOCATIONC_CHANGGED:
+                        Pair<String,String> pair=(Pair<String,String>)msg.obj;
+                        textView2.setText("经度："+pair.first+"; 纬度："+pair.second);
+                        break;
                 }
             }
         };
         myGPS=new MyGPS(lm,handler);
-
+        //TODO:基站功能待测试
+        baseStation=new BaseStation((TelephonyManager)getSystemService(TELEPHONY_SERVICE),handler,(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE));
     }
 
     @Override
