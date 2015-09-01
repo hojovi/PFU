@@ -15,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import com.httht.lenovo.pfu.CCamera.CameraActivity;
+import com.httht.lenovo.pfu.GPS.GpsActivity;
 import com.httht.lenovo.pfu.MultiTouch.MultiTouchActivity;
 
 public class MainActivity extends AppCompatActivity {
@@ -54,7 +55,10 @@ public class MainActivity extends AppCompatActivity {
                         intent=new Intent(MainActivity.this, CameraActivity.class);
                         startActivity(intent);
                         break;
-
+                    case "GPS":
+                        intent=new Intent(MainActivity.this, GpsActivity.class);
+                        startActivity(intent);
+                        break;
                 }
             }
         });
