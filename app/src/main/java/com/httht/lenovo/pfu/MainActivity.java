@@ -2,9 +2,14 @@ package com.httht.lenovo.pfu;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,6 +23,9 @@ import com.httht.lenovo.pfu.CCamera.CameraActivity;
 import com.httht.lenovo.pfu.GPS.GpsActivity;
 import com.httht.lenovo.pfu.MultiTouch.MultiTouchActivity;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class MainActivity extends AppCompatActivity {
 
     private ListView listView;
@@ -25,6 +33,9 @@ public class MainActivity extends AppCompatActivity {
     private String[] listItems;
     private String[] supportedStatus;
 //    private HashMap<String,String> map;
+
+    private SensorManager sm;
+    private List<Pair<Sensor,SensorEventListener>> sensors;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,6 +45,8 @@ public class MainActivity extends AppCompatActivity {
         listView=(ListView)findViewById(R.id.listView);
         listItems=getResources().getStringArray(R.array.sensors);
         supportedStatus=new String[listItems.length];
+        sm=(SensorManager)getSystemService(SENSOR_SERVICE);
+        sensors=new ArrayList<>();
         setSupportedStatus();
         try {
             adapter=new MyAdapter(listItems,supportedStatus);
@@ -98,14 +111,44 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 case "温度传感器":
                     if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_AMBIENT_TEMPERATURE)){
-                        supportedStatus[i]="支持";
+                        final int pos=i;
+                        Sensor sensor=sm.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
+                        SensorEventListener listener=new SensorEventListener() {
+                            @Override
+                            public void onSensorChanged(SensorEvent event) {
+                                supportedStatus[pos]=String.valueOf(event.values[0])+"℃";
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                            }
+                        };
+                        sm.registerListener(listener, sensor, 5000);
+                        sensors.add(new Pair<Sensor, SensorEventListener>(sensor,listener));
                     }else{
                         supportedStatus[i]="不支持";
                     }
                     break;
                 case "湿度传感器":
                     if(pm.hasSystemFeature(PackageManager.FEATURE_SENSOR_RELATIVE_HUMIDITY)){
-                        supportedStatus[i]="支持";
+                        final int pos=i;
+                        Sensor sensor=sm.getDefaultSensor(Sensor.TYPE_RELATIVE_HUMIDITY);
+                        SensorEventListener listener=new SensorEventListener() {
+                            @Override
+                            public void onSensorChanged(SensorEvent event) {
+                                supportedStatus[pos]=String.valueOf(event.values[0]);
+                                adapter.notifyDataSetChanged();
+                            }
+
+                            @Override
+                            public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+                            }
+                        };
+                        sm.registerListener(listener,sensor,5000);
+                        sensors.add(new Pair<Sensor, SensorEventListener>(sensor,listener));
                     }else{
                         supportedStatus[i]="不支持";
                     }
