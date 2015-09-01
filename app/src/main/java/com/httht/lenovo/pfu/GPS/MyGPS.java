@@ -17,24 +17,31 @@ import java.util.Iterator;
  * Created by lenovo on 2015/8/31.
  */
 public class MyGPS {
-    private LocationListener ll;
+    private LocationListener gpsll;
+    private LocationListener networkll;
     private LocationManager lm;
 //    private GpsStatus gs;
-    private String provider;
+//    private String gpsProvider;
+//    private String networkProvider;
     private Handler handler;
     public MyGPS(LocationManager lm, final Handler handler){
         this.handler=handler;
         this.lm=lm;
-        provider=lm.getProvider(LocationManager.GPS_PROVIDER).getName();
-        if(!lm.isProviderEnabled(provider)){
+//        gpsProvider=lm.getProvider(LocationManager.GPS_PROVIDER).getName();
+
+        if(!lm.isProviderEnabled(LocationManager.GPS_PROVIDER)){
             handler.sendMessage(Message.obtain(null, GpsActivity.GPS_REQUEST_ENABLE));
-        }else {
-            handler.sendMessage(Message.obtain(null, GpsActivity.LOCATION_CHANGED, lm.getLastKnownLocation(provider)));
         }
-        ll=new LocationListener() {
+        handler.sendMessage(Message.obtain(null, GpsActivity.GPS_LOCATION_CHANGED, lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)));
+        if(!lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER)){
+            handler.sendMessage(Message.obtain(null, GpsActivity.NETWORK_REQUEST_ENABLE));
+        }
+        handler.sendMessage(Message.obtain(null, GpsActivity.NETWORK_LOCATION_CHANGED,lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)));
+        gpsll=new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                handler.sendMessage(Message.obtain(null, GpsActivity.LOCATION_CHANGED,location));
+                Log.e("gps","locationchanged");
+                handler.sendMessage(Message.obtain(null, GpsActivity.GPS_LOCATION_CHANGED,location));
             }
 
             @Override
@@ -44,15 +51,40 @@ public class MyGPS {
 
             @Override
             public void onProviderEnabled(String provider) {
-                Log.e("gps","打开");
+                Log.e(provider,"打开");
             }
 
             @Override
             public void onProviderDisabled(String provider) {
-                handler.sendMessage(Message.obtain(null, GpsActivity.GPS_CLOSED));
+                if(provider.equals(LocationManager.GPS_PROVIDER)) {
+                    handler.sendMessage(Message.obtain(null, GpsActivity.GPS_CLOSED));
+                }
             }
         };
-        lm.requestLocationUpdates(provider,1000,0,ll);
+        networkll=new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                Log.e("network","locationchanged");
+                handler.sendMessage(Message.obtain(null, GpsActivity.NETWORK_LOCATION_CHANGED,location));
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+                Log.e(provider,"打开");
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+                handler.sendMessage(Message.obtain(null, GpsActivity.NETWORK_LOCATION_CLOSED));
+            }
+        };
+        lm.requestLocationUpdates(LocationManager.GPS_PROVIDER,1000,0,gpsll);
+        lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,0,0,networkll);
     }
 
     public void addGpsStatusListener(){
