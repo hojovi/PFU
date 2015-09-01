@@ -49,7 +49,7 @@ public class MyGPS {
 
             @Override
             public void onProviderDisabled(String provider) {
-
+                handler.sendMessage(Message.obtain(null, GpsActivity.GPS_CLOSED));
             }
         };
         lm.requestLocationUpdates(provider,1000,0,ll);

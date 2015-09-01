@@ -13,6 +13,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.httht.lenovo.pfu.R;
 
@@ -21,6 +22,7 @@ public class GpsActivity extends AppCompatActivity {
 //    public static final int GPS_ENABLED=2;
     public static final int GPS_UPDATE_SATELLITE_STATUS=3;
     public static final int GPS_REQUEST_ENABLE=4;
+    public static final int GPS_CLOSED=5;
     private TextView textView;
     private double latitude=0.0;
     private double longitude=0.0;
@@ -57,6 +59,9 @@ public class GpsActivity extends AppCompatActivity {
                                 })
                                 .setNegativeButton("取消",null)
                                 .show();
+                        break;
+                    case GPS_CLOSED:
+                        Toast.makeText(GpsActivity.this,"GPS被关闭",Toast.LENGTH_SHORT).show();
                         break;
                 }
             }
